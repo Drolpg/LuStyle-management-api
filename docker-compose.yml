@@ -23,7 +23,7 @@ services:
     depends_on:
       - db
     environment:
-      DATABASE_URL: postgres://postgres:postgres@db:5432/luestyle
+      DATABASE_URL: postgresql://postgres:postgres@db:5432/lustyle
 
 volumes:
   pgdata:
