@@ -1,6 +1,6 @@
-from sqlalchemy import Column, Integer, String, DateTime
+from sqlalchemy import Column, Integer, String, DateTime, Boolean
 from app.core.database import Base
-from datetime import datetime
+from datetime import datetime, UTC
 
 
 class Client(Base):
@@ -11,4 +11,5 @@ class Client(Base):
     email = Column(String, unique=True, index=True)
     cpf = Column(String, unique=True, index=True)
     phone_number = Column(String, unique=True, index=True)
-    registration_date = Column(DateTime, default=datetime.utcnow)
+    registration_date = Column(DateTime, default=lambda: datetime.now(UTC))
+    is_active = Column(Boolean, default=True)

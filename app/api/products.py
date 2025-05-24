@@ -14,7 +14,7 @@ def create_product(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    new_product = Product(**product.dict())
+    new_product = Product(**product.model_dump())
     db.add(new_product)
     db.commit()
     db.refresh(new_product)

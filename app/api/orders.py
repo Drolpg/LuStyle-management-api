@@ -14,7 +14,7 @@ def create_order(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    new_order = Order(**order.dict())
+    new_order = Order(**order.model_dump())
     db.add(new_order)
     db.commit()
     db.refresh(new_order)

@@ -3,10 +3,10 @@ from app.api import auth, clients, products, orders
 
 # (temporario para testar)
 
-from app.core.database import Base, engine
-from app.models import user, client, product, order  # noqa: F401
+# from app.core.database import Base, engine
+# from app.models import user, client, product, order  # noqa: F401
 
-Base.metadata.create_all(bind=engine)
+# Base.metadata.create_all(bind=engine)
 
 
 app = FastAPI()

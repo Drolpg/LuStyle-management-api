@@ -1,6 +1,6 @@
 from sqlalchemy import Column, Integer, ForeignKey, DateTime
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, UTC
 from app.core.database import Base
 
 
@@ -11,7 +11,7 @@ class Order(Base):
     client_id = Column(Integer, ForeignKey("clients.id"), nullable=False)
     product_id = Column(Integer, ForeignKey("products.id"), nullable=False)
     quantity = Column(Integer, nullable=False)
-    created_at = Column(DateTime, default=datetime.utcnow)
+    created_at = Column(DateTime, default=lambda: datetime.now(UTC))
 
     client = relationship("Client", backref="orders")
     product = relationship("Product", backref="orders")

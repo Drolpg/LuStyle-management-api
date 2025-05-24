@@ -23,7 +23,7 @@ def create_client(
             raise HTTPException(
                 status_code=400, detail=f"{field} já cadastrado")
 
-    new_client = Client(**client.dict())
+    new_client = Client(**client.model_dump())
     db.add(new_client)
     db.commit()
     db.refresh(new_client)
@@ -44,7 +44,7 @@ def get_client(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    client = db.query(Client).get(client_id)
+    client = db.get(Client, client_id)
     if not client:
         raise HTTPException(status_code=404, detail="Cliente não encontrado")
     return client
@@ -57,10 +57,10 @@ def update_client(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    client = db.query(Client).get(client_id)
+    client = db.get(Client, client_id)
     if not client:
         raise HTTPException(status_code=404, detail="Cliente não encontrado")
-    for key, value in update.dict().items():
+    for key, value in update.model_dump().items():
         setattr(client, key, value)
     db.commit()
     db.refresh(client)
@@ -73,7 +73,7 @@ def delete_client(
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user),
 ):
-    client = db.query(Client).get(client_id)
+    client = db.get(Client, client_id)
     if not client:
         raise HTTPException(status_code=404, detail="Cliente não encontrado")
     db.delete(client)

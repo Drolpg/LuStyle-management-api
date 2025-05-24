@@ -1,13 +1,14 @@
-from sqlalchemy import create_engine
 import os
+from sqlalchemy import create_engine
 
 DATABASE_URL = os.getenv(
     "DATABASE_URL", "postgresql://postgres:postgres@localhost:5432/lustyle"
 )
-engine = create_engine(DATABASE_URL)
 
 try:
+    engine = create_engine(DATABASE_URL)
     with engine.connect() as conn:
-        print("Conexão bem-sucedida!")
+        print("Conexão OK")
 except Exception as e:
-    print("Erro na conexão:", e)
+
+    print("Erro:", str(e).encode("utf-8", errors="replace").decode("utf-8"))

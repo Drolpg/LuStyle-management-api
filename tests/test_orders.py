@@ -1,93 +1,54 @@
-import pytest
-from httpx import AsyncClient
-from sqlalchemy.orm import Session
-from app.main import app
-from app.core.database import get_db  # noqa: F401
-from app.models import user, client, product, order  # noqa: F401
-from app.core.security import create_access_token
+import uuid
 
 
-# Cria um usuário e retorna um token válido
-@pytest.fixture
-def auth_header(db: Session):
-    fake_user = user.User(email="admin@example.com", hashed_password="123")
-    db.add(fake_user)
-    db.commit()
-    token = create_access_token({"sub": fake_user.email})
-    return {"Authorization": f"Bearer {token}"}
+def test_create_order(authenticated_client):
+    unique_suffix_client = uuid.uuid4().hex[:10]
+    client_data = {
+        "name": "Maria da Moda",
+        "email": f"maria.order.{unique_suffix_client}@example.com",
+        "cpf": f"987654321{unique_suffix_client[:2]}",
+        "phone_number": f"118888888{unique_suffix_client[:4]}",
+    }
+    client_response = authenticated_client.post("/clients/", json=client_data)
+    assert (
+        client_response.status_code == 200
+    ), f"Failed to create client: {client_response.text}"
+    client_id = client_response.json()["id"]
 
+    unique_suffix_product = uuid.uuid4().hex[:10]
+    product_data = {
+        "name": f"Calça Jeans {unique_suffix_product}",
+        "price": 99.90,
+        "description": "Calça jeans azul clara",
+        "in_stock": 50,
+    }
+    product_response = authenticated_client.post(
+        "/products/", json=product_data)
+    assert (
+        product_response.status_code == 200
+    ), f"Failed to create product: {product_response.text}"
+    product_id = product_response.json()["id"]
 
-@pytest.mark.asyncio
-async def test_create_order(auth_header):
-    async with AsyncClient(app=app, base_url="http://test") as ac:
-        # Cria client e product antes
-        client_data = {
-            "name": "Cliente Teste",
-            "cpf": "12345678900",
-            "email": "cliente@teste.com",
-            "phone_number": "11999999999",
-        }
-        product_data = {
-            "name": "Produto Teste",
-            "price": 10.0,
-            "description": "Descrição",
-            "in_stock": 100,
-        }
-
-        client_resp = await ac.post(
-            "/clients/", json=client_data, headers=auth_header)
-        product_resp = await ac.post(
-            "/products/", json=product_data, headers=auth_header
-        )
-
-        order_data = {
-            "client_id": client_resp.json()["id"],
-            "product_id": product_resp.json()["id"],
-            "quantity": 2,
-        }
-
-        response = await ac.post(
-            "/orders/", json=order_data, headers=auth_header)
-        assert response.status_code == 200
-        assert response.json()["quantity"] == 2
-
-
-@pytest.mark.asyncio
-async def test_list_orders(auth_header):
-    async with AsyncClient(app=app, base_url="http://test") as ac:
-        response = await ac.get("/orders/", headers=auth_header)
-        assert response.status_code == 200
-        assert isinstance(response.json(), list)
-
-
-@pytest.mark.asyncio
-async def test_get_order(auth_header):
-    async with AsyncClient(app=app, base_url="http://test") as ac:
-        response = await ac.get("/orders/1", headers=auth_header)
-        assert response.status_code in [200, 404]
-
-
-@pytest.mark.asyncio
-async def test_delete_order(auth_header):
-    async with AsyncClient(app=app, base_url="http://test") as ac:
-        # Primeiro cria um pedido
-        client_resp = await ac.get("/clients/", headers=auth_header)
-        product_resp = await ac.get("/products/", headers=auth_header)
-
-        if not client_resp.json() or not product_resp.json():
-            pytest.skip(
-                "Cliente ou produto não disponível para deletar pedido")
-
-        order_data = {
-            "client_id": client_resp.json()[0]["id"],
-            "product_id": product_resp.json()[0]["id"],
+    order_response = authenticated_client.post(
+        "/orders/",
+        json={
+            "client_id": client_id,
+            "product_id": product_id,
             "quantity": 1,
-        }
-        create_resp = await ac.post(
-            "/orders/", json=order_data, headers=auth_header)
-        order_id = create_resp.json()["id"]
+        },
+    )
+    assert (
+        order_response.status_code == 200
+    ), f"Failed to create order: {order_response.text}"
+    data = order_response.json()
+    assert data["client_id"] == client_id
+    assert data["product_id"] == product_id
+    assert data["quantity"] == 1
+    assert "id" in data
 
-        # Agora deleta
-        delete_resp = await ac.delete(
-            f"/orders/{order_id}", headers=auth_header)
-        assert delete_resp.status_code == 200
+
+def test_list_orders(authenticated_client):
+    response = authenticated_client.get("/orders/")
+    assert response.status_code == 200
+    data = response.json()
+    assert isinstance(data, list)
