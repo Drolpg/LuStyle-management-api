@@ -90,20 +90,25 @@ se preferir Crie um arquivo .env na raiz do projeto (no mesmo nível do docker-c
 ## Variáveis de Ambiente para a API
 
 DATABASE_URL=postgresql://postgres:postgres@db:5432/lustyle
+
 SECRET_KEY=sua_chave_secreta_muito_segura_aqui # Mude para uma string longa e aleatória
+
 ACCESS_TOKEN_EXPIRE_MINUTES=30 # Tempo de expiração do token em minutos
 
 Importante: A SECRET_KEY deve ser uma string longa e aleatória. Você pode gerar uma usando Python:
 
 import secrets
+
 print(secrets.token_urlsafe(32))
 
 Crie a Pasta de Migrações do Alembic (se não existir):
+
 O Alembic precisa de uma pasta versions dentro do diretório alembic para armazenar os arquivos de migração.
 
 mkdir -p alembic/versions
 
 Construa e Inicie os Contêineres Docker:
+
 Este comando construirá as imagens Docker e iniciará os serviços da API (api) e do banco de dados (db).
 
 docker compose up --build -d
@@ -113,6 +118,7 @@ docker compose up --build -d
 -d: Inicia os contêineres em modo "detached" (em segundo plano).
 
 Execute as Migrações do Banco de Dados:
+
 Após os contêineres estarem rodando, execute as migrações do Alembic para criar as tabelas no banco de dados.
 
 docker exec -it lustyle-management-api-api-1 alembic upgrade head
@@ -122,18 +128,23 @@ docker exec -it lustyle-management-api-api-1: Executa um comando dentro do cont�
 alembic upgrade head: Aplica todas as migrações pendentes.
 
 Acesse a Documentação da API (Swagger UI):
+
 Sua API estará disponível em <http://localhost:8000>. A documentação interativa (Swagger UI) pode ser acessada em:
+
 <http://localhost:8000/docs>
 
 Execute os Testes (Opcional, mas Recomendado):
+
 Para garantir que tudo está funcionando corretamente, você pode rodar os testes:
 
 docker exec -it lustyle-management-api-api-1 pytest tests/
 
-☁️ Deploy na AWS EC2 com Docker
+## ☁️ Deploy na AWS EC2 com Docker
+
 Este guia descreve como fazer o deploy da API em uma instância AWS EC2 usando Docker.
 
 Pré-requisitos AWS
+
 Uma conta AWS ativa.
 
 Uma instância EC2 (ex: Ubuntu 22.04 LTS, t2.micro) já provisionada e acessível via SSH.
@@ -143,6 +154,7 @@ Conhecimento básico de SSH e linha de comando Linux.
 Chave SSH (.pem): Certifique-se de ter sua chave SSH para acessar a instância.
 
 Configuração da Instância EC2
+
 Conecte-se à sua Instância EC2 via SSH:
 
 ssh -i /caminho/para/sua/chave.pem ec2-user@<IP_PUBLICO_DA_SUA_EC2>
@@ -152,9 +164,11 @@ ssh -i /caminho/para/sua/chave.pem ec2-user@<IP_PUBLICO_DA_SUA_EC2>
 Atualize os Pacotes e Instale o Docker:
 
 sudo apt update
+
 sudo apt install -y docker.io docker-compose
 
 Adicione o Usuário ec2-user ao Grupo docker:
+
 Isso permite que você execute comandos Docker sem sudo.
 
 sudo usermod -aG docker ec2-user
@@ -162,14 +176,17 @@ sudo usermod -aG docker ec2-user
 Importante: Você precisará sair e reconectar via SSH para que as mudanças no grupo tenham efeito.
 
 Verifique a Instalação do Docker:
+
 Após reconectar, execute:
 
 docker --version
+
 docker compose version
 
 Ambos os comandos devem retornar as versões instaladas.
 
 Configuração do Security Group (Grupo de Segurança)
+
 Certifique-se de que o Security Group associado à sua instância EC2 permite o tráfego nas portas necessárias:
 
 Porta 22 (SSH): Para acesso SSH.
@@ -193,12 +210,15 @@ Type: Custom TCP | Port range: 8000 | Source: Anywhere (ou seu IP, se preferir r
 Clique em Save rules.
 
 Deploy da Aplicação
+
 Clone o Repositório na Instância EC2:
 
 git clone <https://github.com/Drolpg/LuStyle-management-api.git>
+
 cd LuStyle-management-api
 
 Crie o Arquivo de Variáveis de Ambiente (.env):
+
 Repita o passo de criação do .env com as mesmas variáveis usadas localmente.
 
 nano .env
@@ -206,8 +226,11 @@ nano .env
 ## Cole o conteúdo do seu .env local aqui
 
 DATABASE_URL=postgresql://postgres:postgres@db:5432/lustyle
+
 SECRET_KEY=sua_chave_secreta_muito_segura_aqui
+
 ACCESS_TOKEN_EXPIRE_MINUTES=30
+
 Salve e saia (Ctrl+X, Y, Enter)
 
 Construa e Inicie os Contêineres Docker:
@@ -220,11 +243,13 @@ Execute as Migrações do Banco de Dados:
 
 docker exec -it lustyle-management-api-api-1 alembic upgrade head
 
-Importante: Se for a primeira vez que você está subindo o projeto na EC2 e o banco de dados está vazio, você pode precisar gerar a migração inicial primeiro, caso não tenha sido gerada no seu ambiente local ou se houver um problema no histórico. Se o comando acima falhar, tente:
+Importante: Se for a primeira vez que você está subindo o projeto na EC2 e o banco de dados está vazio, você pode
+precisar gerar a migração inicial primeiro, caso não tenha sido gerada no seu ambiente local ou se houver um problema no histórico. Se o comando acima falhar, tente:
 
 docker exec -it lustyle-management-api-api-1 alembic revision --autogenerate -m "initial_tables_setup" --head=base
 
 Revise o arquivo gerado em alembic/versions/ para garantir que ele cria todas as tabelas.
+
 Em seguida, execute novamente:
 
 docker exec -it lustyle-management-api-api-1 alembic upgrade head
@@ -238,7 +263,9 @@ Ambos os serviços (api e db) devem estar com status Up.
 ## Acesse a API Deployada
 
 Sua API estará acessível publicamente no IP público da sua instância EC2 na porta 8000.
+
 A documentação interativa (Swagger UI) pode ser acessada em:
+
 http://<IP_PUBLICO_DA_SUA_EC2>:8000/docs
 
 📚 Documentação da API
