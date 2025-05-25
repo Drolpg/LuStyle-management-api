@@ -11,7 +11,7 @@ def test_create_order(authenticated_client):
     }
     client_response = authenticated_client.post("/clients/", json=client_data)
     assert (
-        client_response.status_code == 200
+        client_response.status_code == 201
     ), f"Failed to create client: {client_response.text}"
     client_id = client_response.json()["id"]
 
@@ -25,7 +25,7 @@ def test_create_order(authenticated_client):
     product_response = authenticated_client.post(
         "/products/", json=product_data)
     assert (
-        product_response.status_code == 200
+        product_response.status_code == 201
     ), f"Failed to create product: {product_response.text}"
     product_id = product_response.json()["id"]
 
@@ -38,7 +38,7 @@ def test_create_order(authenticated_client):
         },
     )
     assert (
-        order_response.status_code == 200
+        order_response.status_code == 201
     ), f"Failed to create order: {order_response.text}"
     data = order_response.json()
     assert data["client_id"] == client_id

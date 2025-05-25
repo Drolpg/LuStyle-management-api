@@ -33,7 +33,7 @@ def test_create_client(authenticated_client):
         },
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
     assert data["name"] == "João da Silva"
     assert "id" in data
@@ -71,7 +71,7 @@ def test_delete_client(authenticated_client):
     client_db_entry = create_test_client_db_entry()
     response = authenticated_client.delete(f"/clients/{client_db_entry.id}")
 
-    assert response.status_code == 200
+    assert response.status_code == 204
 
     response = authenticated_client.get(f"/clients/{client_db_entry.id}")
     assert response.status_code == 404

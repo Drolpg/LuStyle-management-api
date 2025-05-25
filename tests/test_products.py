@@ -13,7 +13,7 @@ def test_create_product(authenticated_client):
         },
     )
 
-    assert response.status_code == 200
+    assert response.status_code == 201
     data = response.json()
     assert data["name"] == f"Camiseta Básica {unique_suffix}"
     assert data["price"] == 49.90
