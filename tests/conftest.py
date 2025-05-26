@@ -18,6 +18,7 @@ def authenticated_client():
             self.email = "test@example.com"
             self.is_active = True
             self.password = "mocked_hashed_password"
+            self.is_admin = True
 
     def override_get_current_user():
         return MockUser()

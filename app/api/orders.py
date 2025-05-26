@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
-from app.core.deps import get_db, get_current_user
+from app.core.deps import get_db, get_current_user, get_current_admin_user
 from app.core.exceptions import NotFoundException
 from app.models.order import Order
 from app.models.user import User
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/orders", tags=["orders"])
 def create_order(
     order: OrderCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_admin_user),
 ):
     try:
         new_order = Order(**order.model_dump())
@@ -73,7 +73,7 @@ def get_order(
 def delete_order(
     order_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_admin_user),
 ):
     try:
         order = db.query(Order).get(order_id)

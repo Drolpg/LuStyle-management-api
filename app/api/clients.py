@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from app.schemas.client import ClientCreate, ClientOut
 from app.models.client import Client
 from app.core.exceptions import AlreadyExistsException, NotFoundException
-from app.core.deps import get_db, get_current_user
+from app.core.deps import get_db, get_current_user, get_current_admin_user
 from app.models.user import User
 
 router = APIRouter(prefix="/clients", tags=["clients"])
@@ -14,7 +14,7 @@ router = APIRouter(prefix="/clients", tags=["clients"])
 def create_client(
     client: ClientCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_admin_user),
 ):
     try:
         for field, value in [
@@ -86,7 +86,7 @@ def update_client(
     client_id: int,
     update: ClientCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_admin_user),
 ):
     try:
         client = db.get(Client, client_id)
@@ -113,7 +113,7 @@ def update_client(
 def delete_client(
     client_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_admin_user),
 ):
     try:
         client = db.get(Client, client_id)

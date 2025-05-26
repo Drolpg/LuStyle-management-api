@@ -2,7 +2,6 @@ from passlib.context import CryptContext
 from datetime import datetime, timedelta, timezone
 from jose import jwt
 
-# senha
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 

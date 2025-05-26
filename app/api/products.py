@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from app.schemas.product import ProductCreate, ProductOut
 from app.models.product import Product
-from app.core.deps import get_db, get_current_user
+from app.core.deps import get_db, get_current_user, get_current_admin_user
 from app.core.exceptions import NotFoundException
 from app.models.user import User
 
@@ -17,7 +17,7 @@ router = APIRouter(prefix="/products", tags=["products"])
 def create_product(
     product: ProductCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_admin_user),
 ):
     try:
         new_product = Product(**product.model_dump())
@@ -74,7 +74,7 @@ def update_product(
     product_id: int,
     update: ProductCreate,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_admin_user),
 ):
     try:
         product = db.query(Product).get(product_id)
@@ -104,7 +104,7 @@ def update_product(
 def delete_product(
     product_id: int,
     db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user),
+    current_user: User = Depends(get_current_admin_user),
 ):
     try:
         product = db.query(Product).get(product_id)

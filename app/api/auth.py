@@ -31,7 +31,10 @@ def register(user_in: UserCreate, db: Session = Depends(get_db)):
         raise HTTPException(status_code=400, detail="Email já registrado")
 
     user = User(
-        email=user_in.email, hashed_password=hash_password(user_in.password))
+        email=user_in.email,
+        hashed_password=hash_password(user_in.password),
+        is_admin=user_in.is_admin,
+    )
     db.add(user)
     db.commit()
     db.refresh(user)
@@ -55,3 +58,9 @@ def login(
 @router.get("/me", response_model=UserOut)
 def read_current_user(current_user: User = Depends(get_current_user)):
     return current_user
+
+
+@router.post("/refresh-token", response_model=Token)
+def refresh_token(current_user: User = Depends(get_current_user)):
+    new_access_token = create_access_token(data={"sub": current_user.email})
+    return {"access_token": new_access_token, "token_type": "bearer"}
